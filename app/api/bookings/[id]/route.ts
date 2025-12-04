@@ -1,29 +1,41 @@
-import { type NextRequest, NextResponse } from "next/server"
-import { bookingService } from "@/lib/db"
+import { type NextRequest, NextResponse } from "next/server";
+import { bookingService } from "@/lib/db";
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+// GET BOOKING BY ID
+export async function GET(
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
   try {
-    const booking = await bookingService.findById(params.id)
+    const { id } = await context.params; // Important for Netlify
+
+    const booking = await bookingService.findById(id);
 
     if (!booking) {
-      return NextResponse.json({ error: "Booking not found" }, { status: 404 })
+      return NextResponse.json({ error: "Booking not found" }, { status: 404 });
     }
 
-    return NextResponse.json(booking)
+    return NextResponse.json(booking, { status: 200 });
   } catch (error) {
-    console.error("Error fetching booking:", error)
-    return NextResponse.json({ error: "Failed to fetch booking" }, { status: 500 })
+    console.error("Error fetching booking:", error);
+    return NextResponse.json({ error: "Failed to fetch booking" }, { status: 500 });
   }
 }
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+// UPDATE BOOKING BY ID
+export async function PUT(
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
   try {
-    const body = await request.json()
-    const booking = await bookingService.update(params.id, body)
+    const { id } = await context.params; // Important for Netlify
 
-    return NextResponse.json(booking)
+    const body = await request.json();
+    const updated = await bookingService.update(id, body);
+
+    return NextResponse.json(updated, { status: 200 });
   } catch (error) {
-    console.error("Error updating booking:", error)
-    return NextResponse.json({ error: "Failed to update booking" }, { status: 500 })
+    console.error("Error updating booking:", error);
+    return NextResponse.json({ error: "Failed to update booking" }, { status: 500 });
   }
 }
